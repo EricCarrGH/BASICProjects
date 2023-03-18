@@ -1,14 +1,9 @@
-# FastBasic Projects
+# BASIC Projects
 
-This repo contains the source to programs I have written in FastFasic.
-
-FastBasic is fast interpreter for the BASIC language on the Atari 8-bit computers and the Atari 5200 console. 
-
-You can downliad it at https://github.com/dmsc/fastbasic
-
+This repo contains the source to programs I have written in various BASICs over the years
 
 ## Jumpman
-A randomly generated endless platform scroller inspired by Mario
+A randomly generated endless platform scroller inspired by Mario, written in FastBasic for Atari 8-bit.
 
 This was an entry for the 2023 BASIC 10 Liner Contest (10 lines of up to 256 characters).
  * Contest page: https://www.homeputerium.de/
@@ -16,7 +11,11 @@ This was an entry for the 2023 BASIC 10 Liner Contest (10 lines of up to 256 cha
  
  
 ## Star Runner
-A short space shooter/astroid dodger gameo
+A short space shooter/astroid dodger game, written in FastBasic for Atari 8-bit.
 
 This was an entry for the 2023 BASIC 10 Liner Contest (10 lines of up to 256 characters).
  * Contest page: https://www.homeputerium.de/
+
+
+# Notes
+* FastBasic is fast interpreter for the BASIC language on the Atari 8-bit computers and the Atari 5200 console.  You can downliad it at https://github.com/dmsc/fastbasic
