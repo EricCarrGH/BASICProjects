@@ -175,6 +175,8 @@ if n._lives :@s:exit: e.
 move &_starDim,_playfield,416
 
 ' Reset player position - Center position happens to be a palindromic number!
+' _playerX is a WORD, two bytes that control the X position of PMG player 0 and 1. Instead of poking N to two locations, 
+' I DPOKE N+256*N to one location. _playerX = N+256*N, and I adjust it by (1+256*1) 257 when moving a pixel to the left or right.
 _playerX = 32123
 _D000=$D000
 dpoke _D000, _playerX
@@ -193,7 +195,7 @@ pos.2,0:?#6,c.128"ships   wave    ";c.128_lives
 ' Player & Playfield Colors.
 m.&""$D8$E4$42$38$92$9f$06$26,703,9
 
-' Joystick direction lookup
+' Joystick direction lookup, for speed. Checks if left or right is pressed, and multiplies direction (1 or -1) * 257 to move the player left or right a pixel.
 for i=0 to 13
   _stickDir(i)=((n.i&8)-n.i&4)*257
 n.
@@ -252,14 +254,14 @@ do
     dec _waitForMissle
   e.
   
-  ' Two DECs takes 25% less cycles than _vscroll=_vscroll+2
+  ' Two DECs takes 25% less cycles than _vscroll=_vscroll-2
   DEC _vscroll:DEC _vscroll
 
   ' Fine scrolled to the end, now we must increment entire row (coarse scroll)
   if _vscroll<0
     _vscroll=14
     
-    ' Precalc dim star row location before vblank
+    ' Precalc dim star row location before vertical retrace
     i = &_starDim+32*_dimStarRow
     
     ' Reset dim star row if reached end 
@@ -267,7 +269,7 @@ do
       _dimStarRow=12
     e.
     
-    ' Copy playfield to buffer (to avoid vsync flicker)
+    ' Copy playfield to buffer (to avoid copying while drawing the screen, which caused flicker near the top)
     -move _playfield,_playfieldBuf,382
 
     ' Wait for vertical retrace
