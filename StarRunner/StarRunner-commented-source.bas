@@ -86,6 +86,7 @@ _musicE=_musicI+64
 ' Lookups for start of memory PMG location to animate thrusters
 _pm2=pm.2+111
 
+  ' Set custom character set at 1024 byte aligned location 
 _charset=$4800
 
 ' Custom Display List to enable offscreen buffer and vertical scrolling
@@ -118,7 +119,7 @@ _dimStarCounter=95
 ' Set player ship graphics
 f.i=0t.1:m.q+97+13*i,pm.i+98,13:n.
 
-' Set custom character set at 1024 byte aligned location and copy the set from rom to get letters/numbers
+  ' Copy ROM characters to custom character from to get letters/numbers
 M.P.756*256,_charset,1024
 
 ' Create star chars and clear adjacent set of chars used for dim slow moving star effect
@@ -138,11 +139,6 @@ P.756,72 ' 72 = $4800/256
 ' 5|8, 13|16 = Med Asteroids
 ' 0B, 19     = Large asteroid
 ' 1D         = Mine
-' Part key (gray and brown)
-' 1|3, 15|17 = Small Asteroids
-' 5|8, 19|22 = Med Asteroids
-' 11, 25     = Large asteroid
-' 29         = Mine
 '                   1     3     5        8        0B          0F    11    13       16       19          1D
 _wavePart=&""$01$59$01$5A$02$52$53$02$54$55$03$56$57$58$01$D9$01$DA$02$D2$D3$02$D4$D5$03$D6$D7$D8$02$50$51
 
@@ -197,9 +193,7 @@ pos.2,0:?#6,c.128"ships   wave    ";c.128_lives
 ' Player & Playfield Colors.
 m.&""$D8$E4$42$38$92$9f$06$26,703,9
 
-'for i=0 to 14:poke $d405,i:get k:n.
-
-' Joystick direction lookup (and render initial bright stars)
+' Joystick direction lookup
 for i=0 to 13
   _stickDir(i)=((n.i&8)-n.i&4)*257
 n.
