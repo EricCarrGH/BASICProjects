@@ -1,6 +1,6 @@
 # BASIC Projects
 
-This repo contains the source to programs I have written in various BASICs over the years
+This repo contains the source to programs I have written in various BASICs over the years.
 
 
 
@@ -37,7 +37,7 @@ It placed 1st in Public's Choice and 4th in the Expert rating.
 
 
  ## Pacman
-<img src="Pacman/Pacman.png" width="50%">
+<img src="Pacman/pacman.png" width="50%">
 
 I challenged myself to develop a Pacman clone in FastBasic. You can play 10+ levels, the fruit changes, the ghosts get faster, and power time shrinks.  I learned a great deal about the original Pacman while doing this. There is no sound except the opening music. I did start experimenting with sound, and this file is also here. I may return to finish this game at some point and add sound using an interrupt. The ghost movement is currently random, but it does follow the same rules as the original - the ghosts cannot switch directions 180 degrees arbitrarily or move UP into the blank area below their home from below.
 
@@ -48,9 +48,19 @@ The source is not commented, but is presented as-is.
  * Source: [pacman.bas](Pacman/pacman.bas)
  * Sound Attempt: [pacman-sound-attempt.bas](Pacman/pacman-sound-attempt.bas)
  
+## Snowflake Demo
+<img src="Snow/img/snow-1.png" width="50%">
+
+I wrote this Atari BASIC demo as part of a snow fall challenge in 2023, and made it a 10 liner to challenge myself. This demo illustrates how to create the illusion of 40 individual snowflakes falling smoothing, while snow gradually piles up on the ground, using only the BASIC that was built in to Atari XL and XE machines.
 
 
-# Development Environment
+ * In-depth explanation: [Snow readme](Snow/README.md)
+ * 10-liner: [snow-10lines.bas](Snow/snow-10lines.bas)
+ * Expanded with commments: [snow.bas](Snow/snow.bas)
+ 
+
+
+# FastBasic Development Environment
 * FastBasic is fast interpreter for the BASIC language on the Atari 8-bit computers and the Atari 5200 console.  You can download it at https://github.com/dmsc/fastbasic
 * I use the cross platform compiler in Windows and Mac, coding in [Visual Studio Code](https://code.visualstudio.com/).
 * I wrote a [FastBasic Debugger Extension](https://marketplace.visualstudio.com/items?itemName=EricCarr.fastbasic-debugger) for VSCode to aid in my coding. You can set breakpoints, step through code, and inspect/change variables via an emulator. The extension can automatically install both FastBasic and an Atari Emulator on your Mac (AtariMacX) or Windows (Altirra) machine.
