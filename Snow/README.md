@@ -24,28 +24,33 @@ Here is what the screen looks like when the custom charset is not enabled. Each 
 It is a bunch of static columns of ascending characters. e.g. "ABCD".
 
 For example, consider the following characters that would normally display onscreen like this (X wraps back to A):
+
 ![Animation example](img/ex1.png)
 
 In order to animate two falling snowflakes, I first clear the entire character set so no letters are displayed, then copy the snowflake character (here represented as "*@*") only to the "A" character, resulting in this output:
+
 ![Animation example](img/ex2.png)
 
 When I move the snowflake to the "B" character (clearing A), all A characters on screen are blanked out, and the B character displays the snowflake:
+
 ![Animation example](img/ex3.png)
 
 #### Smooth scrolling
-In order to get the snowflakes to fall pixel by pixel, I take advantage of the fact that an entire Atari charset is laid out in memory as a series of vertical rows, one character after the next. A character is represented by 8 rows, and each row is represented by a byte, so 8 bytes per character.
+In order to get the snowflakes to fall pixel by pixel, I take advantage of the fact that the Atari charset is laid out in memory as a series of characters. A character is represented by 8 rows, and each row is represented by a byte, so 8 bytes per character. 
 
 ![A Atari Charset character](img/charset-char.png)
 
 * (Image taken from https://www.atariarchives.org/agagd/chapter3.php - go there to learn more about Atari charsets).
 
-So, after 8 bytes for "A", will be 8 bytes for "B", then "C", and so on.
+So, there are 8 bytes for "A", then 8 bytes for "B", then "C", and so on. The byte after the bottom of one character is the top row of the next character.
 
-When I shift the character in "A" down two bytes, some rows of the star are at the bottom of "A" and 2 are at the top of "B". Since I drew "B" directly below "A" onscreen, the snowflake appears to smoothly fall down. The Atari automaticaly updates the characters on the screen without needing to issue any draw commands.
+So, when I shift the character in "A" down two bytes, some rows of the star are at the bottom of "A" and 2 are at the top of "B". Since I drew "B" directly below "A" onscreen, the snowflake appears to smoothly move down. The Atari automaticaly updates the characters on the screen without needing to issue any draw commands.
 
 ![Snow character movement example](img/snow-memory.png)
 
-Since there are 24 lines, I take 24 consequtive characters in the charset (e.g. A through X). In order to have 3 independent tracks of snowflakes (each using a different snowflake character), I use three sets of contiguous characters characters in the character set to do this.
+
+
+Since there are 24 lines on the screen in Graphics 0, I take 24 consequtive characters in the charset (e.g. A through X). In order to have 3 independent tracks of snowflakes (each using a different snowflake character), I use three sets of contiguous characters characters in the character set to do this.
 
 Finally, for the growing snow at the bottom, I create 8 characters, each character a row taller than the previous. I update the screen one character per frame to show the snow accumulating, until I overwrite the entire screen:
 
@@ -74,7 +79,7 @@ REM CREATE CUSTOM CHARSET SOURCE BUFFER, TO BE COPIED TO C$ STRINGS EACH FRAME
 REM CLEAR CURSOR, SOURCE BUFFER INDEX LOCATIONS FOR 3 SNOWFLAKE TYPES
 4 POKE 94,0:POKE 752,1:W=ADR(C4$):E=57606:A=806:B=506:C=6:D=121
 
-REM THE SNOWFALL MAGIC HAPPENS HERE! COPY 192 BYTES FROM THE BUFFER TO THE THREE ROWS OF CHARSETS
+REM THE SNOWFALL MAGIC HAPPENS HERE! COPY 192 BYTES FROM THE BUFFER TO EACH OF THE THREE ROWS OF CHARSETS
 5 C1$=B$(A,A+191):A=A-1+(A=801)*191:C2$=B$(B,B+191):B=B-2+(B=402)*190:C3$=B$(C,C+191):C=C-3+(C=3)*192
 
 REM ON FIRST RUN, INITIALIZE. SLOWLY GROW SNOW AT BOTTOM OF SCREEN
@@ -168,18 +173,24 @@ Then this  >        |.....................................********..|
 3. E represents where the original charset is stored in memory, so the letters for "LET IT SNOW" can be copied into C4$ later (the original locations of these letters are used for the snowflake.)
 4. `A,B,C` each represent the starting index in the `B$` buffer to copy into `C1$,C2$,C3$`, respectively.
 
-### Line 5
+### Line 5 and 6 - Main animation loop
+```
+5 C1$=B$(A,A+191):A=A-1+(A=801)*191:C2$=B$(B,B+191):B=B-2+(B=402)*190:C3$=B$(C,C+191):C=C-3+(C=3)*192
+6 ON H GOTO 7:POKE L+R(M),D:M=M+1:ON M<40 GOTO 5:M=0:D=D+1:ON D<129 GOTO 5:D=121:L=L-40:ON L>Z GOTO 5:RUN
+```
+These two lines control the entire animation - everything else in the program is just setup. Line 5 causes the snow to fall, and line 6 causes the snow to build up at the bottom.
+
 ```
 5 C1$=B$(A,A+191):A=A-1+(A=801)*191:C2$=B$(B,B+191):B=B-2+(B=402)*190:C3$=B$(C,C+191):C=C-3+(C=3)*192
 ```
-The line is the start of the endless loop. It copies the snowflake and surrounding whitespace (entire 24 characters worth - 24*32=192) from the `B$` string to each of the three `C$` strings. Taking the first string as an example:
+Line 5 copies each custom snowflake character and surrounding whitespace (entire 24 characters worth - 24*32=192) from the `B$` string to each of the three `C$` strings. Taking the first string as an example:
 
-1. `C1$=B$(A,A+191)` - this copies 192 bytes from index A in the buffer to the first row of chars. This is the statement that actually creates the animation.
+1. `C1$=B$(A,A+191)` - this copies 192 bytes from index A in the buffer to the first row of chars. This is the statement that actually causes the animation.
 
 2. `A=A-1+(A=801)*191` - this simply decrements the A index, and wraps it around to the start when if it passes the 24th character. It could also be written like this:
 `A=A-1:IF A=801 THEN A=A+191`
 
-3. Note that I decrement `A` by 1, `B` by 2, and `C` by 3. This causes each snowflake type to fall at a different speed. `A` the slowest, `C` the fastest (3 rows each frame). This produces the parallax effect.
+3. Note that I decrement `A` by 1, `B` by 2, and `C` by 3. This causes each snowflake type to move/fall at a different speed. `A` the slowest, `C` the fastest (3 rows each frame). This produces the parallax effect.
 
 ### Line 6
 ```
@@ -193,4 +204,38 @@ The line is the start of the endless loop. It copies the snowflake and surroundi
     * `ON D<129 GOTO 5:D=121:L=L-40` - Once the tallest character (solid white) is drawn on the entire line `L`, it moves to the next line and repeats the entire process
     * `ON L>Z GOTO 5:RUN` - If the line reaches the top of the screen `Z`, the program starts over
 
-    
+### Lines 7-9 - Initial drawing of screen
+```
+REM INITIALIZE SCREEN BY DRAWING COLUMNS OF CONSEQUTIVE CHARS
+7 H=0:M=0:FOR I=0 TO 39:POKE Z+920+I,128:V=INT(RND(0)*24)+1:T=(I-3*INT(I/3))*32:FOR Y=0 TO 880 STEP 40
+
+REM DRAW THE NEXT CONSEQUETIVE CHARACTER, LOOPING IF IT REACHES THE END
+8 POKE Y+Z+I,V+T:V=V+1:IF V>24 THEN V=1
+
+REM LOOP FOR COLUMN DRAWING, THEN PRINT "LET IT SNOW" 3 TIMES
+9 NEXT Y:NEXT I:FOR I=0 TO 2:POSITION 7+I*7,6+I*3:?"let it snow":NEXT I
+```
+
+Lines 7-9 does two things:
+1. Draws vertical columns of ascending characters, each line starting at a random location, so each snowflake starts at a different position.
+2. Draws "let it snow" on the screen
+
+
+### Lines 10-12
+```
+REM COPY THE ALPHABET CHARS FROM ROM TO OUR NEW LOCATION FOR "LET IT SNOW"
+10 FOR I=8 TO 192:POKE W+I,PEEK(E+I):NEXT I
+
+REM CREATE THE STAIR STEPPING CHARS THAT REPRESENT A GROWING LINE OF SNOW
+11 FOR Y=0 TO 6:FOR I=1 TO 8:POKE W+193+(8*Y)+I,255*(I>7-Y):NEXT I:NEXT Y:GOTO 5
+
+REM DATA FOR OUR 3 SNOWFLAKE CHARACTERS
+12 DATA 16,84,214,56,214,84,16,0, 0,16,84,56,84,16,0,0, 0,0,16,56,16,0,0,0
+```
+1. Line 10 copies alphabet characters from ROM so "let it snow" will display on screen.
+2. Line 11 creates the 8 custom characters that simulate the snow accumulating
+3. Line 12 is the DATA statement for the 3 custom snowflakes
+
+### That's all, folks
+
+Thank you for checking out this page. If you have any comments or suggestions to improve this page, please [let me know](https://github.com/EricCarrGH/BASICProjects/issues/new).
