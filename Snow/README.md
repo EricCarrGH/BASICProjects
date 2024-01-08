@@ -4,7 +4,7 @@
 ## Background
 I wrote this as part of a snow fall challenge in 2023, and made it a 10 liner to challenge myself. This demo illustrates how to create the illusion of 40 individual snowflakes falling smoothing, while snow gradually piles up on the ground, using only the BASIC that was built in to Atari XL and XE machines.
 
-## Explanation of code
+## Overview of solution
 Moving 40 objects on the screen in Atari BASIC at a decent frame rate with a parallax effect? Impossible! So, how did I do it?  Custom charsets to the rescue!  Instead of constantly redrawing the snowflakes, the screen stays mostly unchanged. I start with an empty character set (every character is an empty space), then move a snowflake character through the characters, one byte (or row of pixels in a single character) at a time using Atari string commands.
 
 The downside of this approach is that it consumes a lot of characters, so you are limited in what else you can put on the screen. However, if you can get by without using some characters, it can be added to games for a cool effect, like a moving star field.
@@ -44,13 +44,13 @@ In order to get the snowflakes to fall pixel by pixel, I take advantage of the f
 
 So, there are 8 bytes for "A", then 8 bytes for "B", then "C", and so on. The byte after the bottom of one character is the top row of the next character.
 
-So, when I shift the character in "A" down two bytes, some rows of the star are at the bottom of "A" and 2 are at the top of "B". Since I drew "B" directly below "A" onscreen, the snowflake appears to smoothly move down. The Atari automaticaly updates the characters on the screen without needing to issue any draw commands.
+So, when I shift the character in "A" down two bytes, some rows of the star are at the bottom of "A" and 2 are at the top of "B". Since I drew "B" directly below "A" onscreen, the snowflake appears to smoothly move down. The Atari automatically updates the characters on the screen without needing to issue any draw commands.
 
 ![Snow character movement example](img/snow-memory.png)
 
 
 
-Since there are 24 lines on the screen in Graphics 0, I take 24 consequtive characters in the charset (e.g. A through X). In order to have 3 independent tracks of snowflakes (each using a different snowflake character), I use three sets of contiguous characters characters in the character set to do this.
+Since there are 24 lines on the screen in Graphics 0, I take 24 consecutive characters in the charset (e.g. A through X). In order to have 3 independent tracks of snowflakes (each using a different snowflake character), I use three sets of contiguous characters characters in the character set to do this.
 
 Finally, for the growing snow at the bottom, I create 8 characters, each character a row taller than the previous. I update the screen one character per frame to show the snow accumulating, until I overwrite the entire screen:
 
@@ -61,7 +61,7 @@ Finally, for the growing snow at the bottom, I create 8 characters, each charact
 
 ## Explanation of code
 
-To make this slightly less confusing, I have re-aranged the 10-liner statements in a more logical way to understand. It is the same code, split into a few more lines.
+To make this slightly less confusing, I have rearranged the 10-liner statements in a more logical way to understand. It is the same code, split into a few more lines.
 
 ```
 REM DIMENSION OUR ARRAYS
@@ -85,10 +85,10 @@ REM THE SNOWFALL MAGIC HAPPENS HERE! COPY 192 BYTES FROM THE BUFFER TO EACH OF T
 REM ON FIRST RUN, INITIALIZE. SLOWLY GROW SNOW AT BOTTOM OF SCREEN
 6 ON H GOTO 7:POKE L+R(M),D:M=M+1:ON M<40 GOTO 5:M=0:D=D+1:ON D<129 GOTO 5:D=121:L=L-40:ON L>Z GOTO 5:RUN
 
-REM INITIALIZE SCREEN BY DRAWING COLUMNS OF CONSEQUTIVE CHARS
+REM INITIALIZE SCREEN BY DRAWING COLUMNS OF CONSECUTIVE CHARS
 7 H=0:M=0:FOR I=0 TO 39:POKE Z+920+I,128:V=INT(RND(0)*24)+1:T=(I-3*INT(I/3))*32:FOR Y=0 TO 880 STEP 40
 
-REM DRAW THE NEXT CONSEQUETIVE CHARACTER, LOOPING IF IT REACHES THE END
+REM DRAW THE NEXT CONSECUTIVE CHARACTER, LOOPING IF IT REACHES THE END
 8 POKE Y+Z+I,V+T:V=V+1:IF V>24 THEN V=1
 
 REM LOOP FOR COLUMN DRAWING, THEN PRINT "LET IT SNOW" 3 TIMES
@@ -196,20 +196,21 @@ Line 5 copies each custom snowflake character and surrounding whitespace (entire
 ```
 6 ON H GOTO 7:POKE L+R(M),D:M=M+1:ON M<40 GOTO 5:M=0:D=D+1:ON D<129 GOTO 5:D=121:L=L-40:ON L>Z GOTO 5:RUN
 ```
+
 1. This checks the H flag, and jumps to line 7 to initialize the rest of the graphics.
 2. Otherwise, this code increments the growing snow on the ground by drawing one character at a time, then looping back to line 5
 3. In depth, this:
     * `POKE L+R(M),D:M=M+1` - Draws current "accumulating snow character" `D` in the next random location `R(M)`, incrementing the location counter `M` .
-    * `ON M<40 GOTO 5:M=0:D=D+1` - Once it fills the entire line (all 40 positions) with character `D`, it increments `D` to the next "slightly taller" character, and starts over to reandomly fill all 40 locations (reseting `M`).
+    * `ON M<40 GOTO 5:M=0:D=D+1` - Once it fills the entire line (all 40 positions) with character `D`, it increments `D` to the next "slightly taller" character, and starts over to randomly fill all 40 locations (resetting `M`).
     * `ON D<129 GOTO 5:D=121:L=L-40` - Once the tallest character (solid white) is drawn on the entire line `L`, it moves to the next line and repeats the entire process
     * `ON L>Z GOTO 5:RUN` - If the line reaches the top of the screen `Z`, the program starts over
 
 ### Lines 7-9 - Initial drawing of screen
 ```
-REM INITIALIZE SCREEN BY DRAWING COLUMNS OF CONSEQUTIVE CHARS
+REM INITIALIZE SCREEN BY DRAWING COLUMNS OF CONSECUTIVE CHARS
 7 H=0:M=0:FOR I=0 TO 39:POKE Z+920+I,128:V=INT(RND(0)*24)+1:T=(I-3*INT(I/3))*32:FOR Y=0 TO 880 STEP 40
 
-REM DRAW THE NEXT CONSEQUETIVE CHARACTER, LOOPING IF IT REACHES THE END
+REM DRAW THE NEXT CONSECUTIVE CHARACTER, LOOPING IF IT REACHES THE END
 8 POKE Y+Z+I,V+T:V=V+1:IF V>24 THEN V=1
 
 REM LOOP FOR COLUMN DRAWING, THEN PRINT "LET IT SNOW" 3 TIMES
@@ -217,6 +218,7 @@ REM LOOP FOR COLUMN DRAWING, THEN PRINT "LET IT SNOW" 3 TIMES
 ```
 
 Lines 7-9 does two things:
+
 1. Draws vertical columns of ascending characters, each line starting at a random location, so each snowflake starts at a different position.
 2. Draws "let it snow" on the screen
 
@@ -232,6 +234,7 @@ REM CREATE THE STAIR STEPPING CHARS THAT REPRESENT A GROWING LINE OF SNOW
 REM DATA FOR OUR 3 SNOWFLAKE CHARACTERS
 12 DATA 16,84,214,56,214,84,16,0, 0,16,84,56,84,16,0,0, 0,0,16,56,16,0,0,0
 ```
+
 1. Line 10 copies alphabet characters from ROM so "let it snow" will display on screen.
 2. Line 11 creates the 8 custom characters that simulate the snow accumulating
 3. Line 12 is the DATA statement for the 3 custom snowflakes
